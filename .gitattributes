@@ -1,6 +1,7 @@
 * text=auto eol=lf
 *.ps1 text eol=crlf
-*.csproj text eol=lf
 *.html text eol=lf
 *.yml text eol=lf
+*.rs text eol=lf
+*.wgsl text eol=lf
 *.png binary

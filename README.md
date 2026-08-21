@@ -3,65 +3,48 @@
 [![build](https://github.com/jethac/obs-fluids/actions/workflows/build.yml/badge.svg)](https://github.com/jethac/obs-fluids/actions/workflows/build.yml)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-GPU fluid simulation that runs three ways from the same **native Direct3D 11** engine (no browser, no WebView2, no WebGL in the exe):
+GPU fluid simulation in **Rust**, GPU via **wgpu on the Vulkan backend** (Metal is available later on macOS). No C#, no .NET, no D3D11, no WebView2, no browser in the exe (~6 MB).
 
 - **Desktop app** — `InkContainer.exe`
 - **Windows screensaver** — `InkContainer.scr`
-- **OBS source** — Game/Window Capture of `InkContainer.exe --obs`
+- **OBS source** — Game Capture of `InkContainer.exe --obs`
 
-It is a Stam solver (advect, project, vorticity, buoyancy) with a Maya 2D-container look: density dropoff, self-shadow, temperature incandescence, and a channel-box panel.
-
-A separate WebGL page (`web/fluid.html`) exists only for the GitHub Pages demo. The screensaver and OBS path do not load it.
-
-**Live demo (browser, optional):** [jethac.github.io/obs-fluids](https://jethac.github.io/obs-fluids/)
+Stam solver (advect, project, vorticity, buoyancy) with a Maya 2D-container look.
 
 MIT licensed. Not a fork of Pavel Dobryakov’s demo and not Autodesk code — method and look are documented in [LINEAGE.md](LINEAGE.md).
 
 ## Quick look
 
 ```text
-host/                   # native D3D11 app + screensaver
-host/fluid.hlsl         # GPU sim passes
-web/fluid.html          # optional browser demo only
-obs/ink-container.lua   # OBS notes (use Game Capture)
+src/                    # Rust app (winit + wgpu/Vulkan)
+shaders/fluid.wgsl      # GPU sim passes
 ```
 
-Run `InkContainer.exe`. Drag in the D3D view to stir. `H` hides the panel, `Space` pauses, `R` resets. `[` / `]` (or the ENERGY slider, or the MX Creative Console dial) is the analog drive: 0 is a still pond, 5 is the preset as authored, 10 is a storm.
+```powershell
+.\build.ps1
+.\dist\InkContainer\InkContainer.exe
+```
+
+Drag to stir. `Space` pause, `R` reset, `P` next preset, `1`–`5` viz, `[` `]` energy. Title bar shows fps and ENERGY.
 
 Presets: **Tech Demo**, **Ink**, **Cloud**, **Fire**, **Fog**.
 
 MX Console setup: [`logi/README.md`](logi/README.md).
 
-## Query string
-
-| Param | Values |
-|---|---|
-| `mode` | `app` (default), `screensaver`, `obs` |
-| `preset` | `demo`, `ink`, `cloud`, `fire`, `fog` |
-| `quality` | `low`, `medium`, `high`, `ultra` |
-| `alpha` | `1` — density as transparency (OBS overlay) |
-| `bloom` | `0` / `1` |
-| `attract` | `0` / `1` self-stirring |
-| `ui` | `0` hide chrome |
-| `hud` | `1` force the viewport readout |
-| `energy` | `0`–`1` initial drive (0.5 = authored preset) |
-
-Screensaver and OBS modes hide the panel and keep attract on so the field never goes idle.
-
 ## Screensaver
 
-Windows 10/11 with Direct3D 11. Self-contained publish needs no extra runtime.
+Needs a Vulkan-capable GPU on Windows. `cargo build --release` produces a native PE, not a runtime bundle.
 
 ```powershell
 .\build.ps1
 .\install-screensaver.ps1
 ```
 
-Or right-click `dist\InkContainer\InkContainer.scr` → **Install**. Self-contained native D3D11; no Edge/WebView2.
+Or right-click `dist\InkContainer\InkContainer.scr` → **Install**. Native Vulkan (wgpu); no Edge, no .NET.
 
-Settings (preset, quality, all monitors) live in `%LocalAppData%\InkContainer\settings.json`. Configure from Screen Saver Settings, or run `InkContainer.exe --config`.
+Settings (preset, quality, energy) live in `%LocalAppData%\InkContainer\settings.json`. Configure from Screen Saver Settings (`/c` opens a windowed preview), or run `InkContainer.exe --config`.
 
-`InkContainer.exe` with no args is the interactive desktop app. Move the mouse or press a key to dismiss the screensaver.
+`InkContainer.exe` with no args is the interactive desktop app. Move the mouse or press a key to dismiss the screensaver. Fullscreen is the current monitor.
 
 ## OBS
 
@@ -71,7 +54,7 @@ InkContainer.exe --obs
 
 Borderless 1920×1080 window, no UI. In OBS add **Game Capture** (preferred) or **Window Capture** on `Ink Container`.
 
-The old Browser Source HTML demo still exists at [jethac.github.io/obs-fluids](https://jethac.github.io/obs-fluids/) if you want a webpage overlay, but the supported path is the native window.
+GitHub Pages at [jethac.github.io/obs-fluids](https://jethac.github.io/obs-fluids/) is a landing page, not the sim.
 
 ## Build
 
@@ -79,21 +62,20 @@ The old Browser Source HTML demo still exists at [jethac.github.io/obs-fluids](h
 .\build.ps1
 ```
 
-Produces `dist\InkContainer\` (self-contained win-x64). Keep that folder together; the `.scr` is a copy of the exe.
+Produces `dist\InkContainer\InkContainer.exe` (~6 MB) and a copy as `.scr`. Same binary runs on Linux after `cargo build --release` (`ink-container`). macOS is the same crate; enable the Metal backend when you get there.
 
 ## Controls (app mode)
 
 | | |
 |---|---|
 | Drag | inject dye + momentum |
-| Middle-click | random color |
 | Space | pause |
 | R | reset and re-seed |
 | C | clear density |
 | A | toggle attract |
-| H | hide attribute panel |
-| 1–7 | shaded dye, raw dye, velocity, pressure, divergence, vorticity, temperature |
-| `[` `]` | energy down / up (Shift = fine). MX Creative Console: see [logi/README.md](logi/README.md) |
+| P | next preset |
+| 1–5 | dye, raw, velocity, pressure, temperature |
+| `[` `]` | energy. MX Creative Console: [logi/README.md](logi/README.md) |
 
 ## Prompts
 
@@ -105,7 +87,7 @@ These are the briefs that produced this repo, quoted as given.
 
 ### Fluid sim (from that thread)
 
-[@scaling01](https://x.com/scaling01/status/2089785384033284144) posted this as the one-shot prompt (they said it was generated by GPT-5.6-Sol). `web/fluid.html` is the sim that prompt asked for; the screensaver, OBS host, Maya look, and ENERGY dial are the extras from the other briefs.
+[@scaling01](https://x.com/scaling01/status/2089785384033284144) posted this as the one-shot prompt (they said it was generated by GPT-5.6-Sol). That brief asked for a single HTML file. This repo implements the same feature checklist natively in Rust + WGSL (Vulkan via wgpu); the screensaver, OBS host, Maya look, and ENERGY dial are extras from the other briefs.
 
 ```
 Create a polished, interactive real-time 2D fluid simulation that runs entirely inside a single self-contained `index.html` file, with all HTML, CSS, JavaScript, shaders, controls, and visual assets embedded directly in that file and with no build process, server, external libraries, frameworks, imports, or network dependencies.

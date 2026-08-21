@@ -6,32 +6,23 @@ Three ways to wire it, in order of how likely they are to just work.
 
 ## 1. Logi Options+ key ticks (always works)
 
-Options+ usually owns the HID device, so WebHID cannot. Map the dial to the keys the sim already listens for.
+Options+ usually owns the HID device, so the native host cannot. Map the dial to the keys the sim already listens for.
 
 1. Open **Logi Options+**
 2. Select the **MX Creative Console Dialpad**
 3. Make a profile for **Ink Container** (or Desktop, if you want it everywhere including the screensaver)
 4. Add **System → Dial Adjustment**
 5. Turn left → `[`  turn right → `]`
-6. Optional: Shift+those keys for fine steps (hold Shift while turning if your mapping allows)
 
 `[` / `]` are ignored by the screensaver exit handler, so you can ride the dial without waking the machine.
 
 ## 2. Direct HID (close Options+ for the console, or don’t let it claim the dial)
 
-In the Ink Container panel: **Arm MX Console**. Chrome/Edge will ask you to pick the Dialpad (`046d:bc00`) or Keypad (`046d:c354`). After that, ticks go straight into ENERGY.
+The native host (`InkContainer.exe` / `.scr`) opens Logitech vendor `046d` product `bc00` (Dialpad) or `c354` (Keypad) via hidapi. Screensaver and desktop both get analog ticks with no browser prompt — **if Options+ is not holding the device exclusive**.
 
-The desktop host (`InkContainer.exe` / `.scr`) also opens those PIDs itself via HidSharp, so the screensaver gets analog ticks with no browser prompt — **if Options+ is not holding the device exclusive**.
+If the dial does nothing, Options+ still has it. Use mapping (1).
 
-If Arm MX Console says “HID blocked” or “No dial claimed”, Options+ still has it. Use mapping (1).
-
-## 3. MIDI CC
-
-**Arm MIDI** in the panel. Absolute CC 7 / 11 / 16 / 17 map 0–127 onto energy. Any other CC is treated as a 0–127 fader the first time it moves.
-
-If you have a MIDI plugin for the MX Console, send CC 16.
-
-## HTTP (Logi Actions plugin / anything else)
+## 3. HTTP (Logi Actions plugin / anything else)
 
 While `InkContainer.exe` or the screensaver is running:
 
@@ -60,6 +51,5 @@ applyAdjustment(_param, diff) {
 
 | | |
 |---|---|
-| On-screen brass pot | drag, or wheel over it |
-| Mouse wheel on the sim | energy (Shift = fine) |
-| `window.ink.setEnergy(0.8)` | from the devtools console |
+| Mouse wheel on the sim | energy |
+| `[` `]` `-` `=` `,` `.` PgUp/PgDn | energy |

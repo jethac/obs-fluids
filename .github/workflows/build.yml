@@ -1,7 +1,3 @@
-# Public GitHub Actions is free for this public repo.
-# windows-latest builds the screensaver/host; ubuntu does a cheap smoke check
-# and publishes the HTML demo to GitHub Pages.
-
 name: build
 
 on:
@@ -20,40 +16,30 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  smoke:
+  linux:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Check required files
-        run: |
-          test -f host/fluid.hlsl
-          test -f host/InkContainer.csproj
-          test -f LICENSE
-          grep -q "PSDisplay" host/fluid.hlsl
-          grep -q "D3D11" host/Gpu.cs
-          grep -q "MIT License" LICENSE
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Native deps
+        run: sudo apt-get update && sudo apt-get install -y libvulkan-dev libudev-dev pkg-config libxkbcommon-dev
+      - name: Check
+        run: cargo check --locked
 
-  host:
+  windows:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: "10.0.x"
-      - name: Publish screensaver host
-        shell: pwsh
-        run: ./build.ps1
-      - name: Stage release files
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Release build
+        run: cargo build --release --locked
+      - name: Stage
         shell: pwsh
         run: |
-          $out = "release"
-          New-Item -ItemType Directory -Force -Path $out | Out-Null
-          Copy-Item dist/InkContainer/InkContainer.exe $out/
-          Copy-Item dist/InkContainer/InkContainer.scr $out/
-          Copy-Item web/fluid.html $out/
-          Copy-Item LICENSE $out/
-          Copy-Item LINEAGE.md $out/
-          Get-ChildItem $out | Format-Table Name, Length
+          New-Item -ItemType Directory -Force -Path release | Out-Null
+          Copy-Item target/release/ink-container.exe release/InkContainer.exe
+          Copy-Item target/release/ink-container.exe release/InkContainer.scr
+          Copy-Item LICENSE, LINEAGE.md, NOTICE release/
       - uses: actions/upload-artifact@v4
         with:
           name: InkContainer-win-x64
@@ -62,7 +48,7 @@ jobs:
 
   release:
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: [smoke, host]
+    needs: [linux, windows]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -72,8 +58,7 @@ jobs:
         with:
           name: InkContainer-win-x64
           path: release
-      - name: Create GitHub Release
-        env:
+      - env:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release create "${{ github.ref_name }}" release/* \
@@ -82,7 +67,6 @@ jobs:
 
   pages:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: [smoke]
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -96,8 +80,7 @@ jobs:
       - name: Stage Pages site
         run: |
           mkdir -p _site
-          cp web/fluid.html _site/index.html
-          cp web/fluid.html _site/fluid.html
+          cp web/index.html _site/index.html
           cp LICENSE LINEAGE.md NOTICE _site/
       - uses: actions/upload-pages-artifact@v3
         with:

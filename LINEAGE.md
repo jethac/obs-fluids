@@ -17,8 +17,8 @@ Maya Fluids is a production system with a much larger surface than this demo (3D
 | Buoyancy / gravity | Temperature rises, density can sink |
 | Color + incandescence + opacity | Dye albedo, fire-ramp glow, optical-depth alpha |
 | Self shadow | 2D extinction march along a key light |
-| Attribute Editor / channel box | Compact right-hand `fluidShape1` panel |
-| Viewport HUD + film-gate corners | Live readout and brass L-corners |
+| Attribute Editor / channel box | Preset keys + `%LocalAppData%\InkContainer\settings.json` |
+| Viewport HUD + film-gate corners | Title-bar fps / ENERGY / preset readout |
 
 We did **not** implement Maya’s 3D voxel solver, fuel/combustion, texture-grid deformers, ocean shader, or any Maya scene format.
 
@@ -30,7 +30,7 @@ The GPU factorization — splat forces, vorticity confinement, divergence, Jacob
 
 ### Same family of steps
 
-Both Pavel’s demo and `web/fluid.html` do, in some form:
+Both Pavel’s demo and this crate do, in some form:
 
 - Gaussian splat of dye and momentum
 - Curl → vorticity confinement
@@ -45,15 +45,15 @@ Those steps are the published method, not a particular repository.
 
 | | Pavel (2017 demo) | Ink Container |
 |---|---|---|
-| Language / runtime | WebGL app, MIT source | Native D3D11 HLSL in the exe; optional WebGL page for GitHub Pages only |
+| Language / runtime | WebGL app, MIT source | Rust + wgpu, Vulkan backend (Metal later on macOS). No browser in the exe. |
 | Dye advection | Bilinear (manual when needed) | MacCormack with neighborhood clamp |
 | Temperature / buoyancy | No | Yes (Fedkiw-style rise) |
 | Shading | Optional lighting, sunrays, bloom | Maya-like self-shadow, incandescence ramp, container dropoff, no sunrays |
 | Color | Random HSV splats, neon HDR | Two-ink palettes (teal/amber, cyan/magenta), optical-depth composite on black |
-| UI | dat.gui-style overlay | Maya channel-box / viewport HUD |
-| Drive | Per-slider | One analog **ENERGY** pot (0 still → 10 storm) plus the sliders |
-| Host | Browser tab | Browser, Windows screensaver (`.scr`), OBS Browser Source, borderless capture window |
-| Hardware | Pointer | Pointer, `[` `]`, wheel, Web MIDI, WebHID / HidSharp for Logitech MX Creative Console |
+| UI | dat.gui-style overlay | Title-bar HUD (fps, ENERGY, preset); keys for the rest |
+| Drive | Per-slider | One analog **ENERGY** pot (0 still → 10 storm) |
+| Host | Browser tab | Native window, Windows screensaver (`.scr`), OBS Game Capture (`--obs`) |
+| Hardware | Pointer | Pointer, `[` `]`, wheel, HTTP `:17331`, hidapi for Logitech MX Creative Console |
 | Diagnostics | Mostly beauty | Dye, velocity, pressure, divergence, vorticity, temperature |
 | License of *this* tree | n/a | MIT, copyright Jetha Chan 2026 |
 

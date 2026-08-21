@@ -3,10 +3,12 @@ Copyright (c) 2026 Jetha Chan
 
 This product is licensed under the MIT License. See LICENSE.
 
-Third-party components (not copied into this source tree; restored from NuGet at build):
+Third-party crates (Cargo):
 
-- Vortice.Windows (Direct3D 11 / DXGI / D3DCompiler) — MIT
-- HidSharp — copyright James F. Bellinger, Apache License 2.0
+- wgpu / naga / wgpu-hal — GPU abstraction; Vulkan backend on Windows and Linux
+- winit — windowing
+- hidapi — MX Creative Console (optional at runtime)
+- bytemuck, serde, serde_json, pollster
 
 The fluid method follows published work by Jos Stam and others (see LINEAGE.md).
 This repository is not a fork of Pavel Dobryakov’s WebGL-Fluid-Simulation
