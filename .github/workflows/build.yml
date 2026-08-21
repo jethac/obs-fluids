@@ -1,0 +1,106 @@
+# Public GitHub Actions is free for this public repo.
+# windows-latest builds the screensaver/host; ubuntu does a cheap smoke check
+# and publishes the HTML demo to GitHub Pages.
+
+name: build
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check required files
+        run: |
+          test -f web/fluid.html
+          test -f host/InkContainer.csproj
+          test -f LICENSE
+          grep -q "WebGL2" web/fluid.html
+          grep -q "ENERGY" web/fluid.html
+          grep -q "MIT License" LICENSE
+
+  host:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+      - name: Publish screensaver host
+        shell: pwsh
+        run: ./build.ps1
+      - name: Stage release files
+        shell: pwsh
+        run: |
+          $out = "release"
+          New-Item -ItemType Directory -Force -Path $out | Out-Null
+          Copy-Item dist/InkContainer/InkContainer.exe $out/
+          Copy-Item dist/InkContainer/InkContainer.scr $out/
+          Copy-Item web/fluid.html $out/
+          Copy-Item LICENSE $out/
+          Copy-Item LINEAGE.md $out/
+          Get-ChildItem $out | Format-Table Name, Length
+      - uses: actions/upload-artifact@v4
+        with:
+          name: InkContainer-win-x64
+          path: release/
+          if-no-files-found: error
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [smoke, host]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: InkContainer-win-x64
+          path: release
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ github.ref_name }}" release/* \
+            --title "${{ github.ref_name }}" \
+            --generate-notes
+
+  pages:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [smoke]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Stage Pages site
+        run: |
+          mkdir -p _site
+          cp web/fluid.html _site/index.html
+          cp web/fluid.html _site/fluid.html
+          cp LICENSE LINEAGE.md NOTICE _site/
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4

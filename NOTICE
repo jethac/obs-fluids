@@ -1,0 +1,13 @@
+Ink Container
+Copyright (c) 2026 Jetha Chan
+
+This product is licensed under the MIT License. See LICENSE.
+
+Third-party components (not copied into this source tree; restored from NuGet at build):
+
+- Microsoft.Web.WebView2 — copyright Microsoft Corporation
+- HidSharp — copyright James F. Bellinger, Apache License 2.0
+
+The fluid method follows published work by Jos Stam and others (see LINEAGE.md).
+This repository is not a fork of Pavel Dobryakov’s WebGL-Fluid-Simulation
+(MIT, Copyright (c) 2017 Pavel Dobryakov) and does not include Autodesk code.
