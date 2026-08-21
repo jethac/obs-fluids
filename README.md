@@ -26,7 +26,7 @@ web/fluid.html          # optional browser demo only
 obs/ink-container.lua   # OBS notes (use Game Capture)
 ```
 
-Open `web/fluid.html` in Edge or Chrome. Drag to stir. `H` hides the panel, `Space` pauses, `R` resets, `1`–`7` switch visualizations. `[` / `]` (or the brass **ENERGY** pot, or the MX Creative Console dial) is the one analog control: 0 is a still pond, 5 is the preset as authored, 10 is a storm.
+Run `InkContainer.exe`. Drag in the D3D view to stir. `H` hides the panel, `Space` pauses, `R` resets. `[` / `]` (or the ENERGY slider, or the MX Creative Console dial) is the analog drive: 0 is a still pond, 5 is the preset as authored, 10 is a storm.
 
 Presets: **Tech Demo**, **Ink**, **Cloud**, **Fire**, **Fog**.
 
@@ -57,7 +57,7 @@ Windows 10/11 with Direct3D 11. Self-contained publish needs no extra runtime.
 .\install-screensaver.ps1
 ```
 
-Or right-click `dist\InkContainer\InkContainer.scr` → **Install**. It is a self-contained ~50 MB exe (WebView2 runtime is already on Windows 11).
+Or right-click `dist\InkContainer\InkContainer.scr` → **Install**. Self-contained native D3D11; no Edge/WebView2.
 
 Settings (preset, quality, all monitors) live in `%LocalAppData%\InkContainer\settings.json`. Configure from Screen Saver Settings, or run `InkContainer.exe --config`.
 
