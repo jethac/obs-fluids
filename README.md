@@ -3,26 +3,27 @@
 [![build](https://github.com/jethac/obs-fluids/actions/workflows/build.yml/badge.svg)](https://github.com/jethac/obs-fluids/actions/workflows/build.yml)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-GPU fluid simulation that runs three ways from the same engine:
+GPU fluid simulation that runs three ways from the same **native Direct3D 11** engine (no browser, no WebView2, no WebGL in the exe):
 
-- **Desktop app** — `InkContainer.exe`, or open `web/fluid.html` in a browser
+- **Desktop app** — `InkContainer.exe`
 - **Windows screensaver** — `InkContainer.scr`
-- **OBS source** — Browser Source, or a borderless capture window
+- **OBS source** — Game/Window Capture of `InkContainer.exe --obs`
 
-It is a WebGL2 Stam solver (advect, project, vorticity, buoyancy) with a Maya 2D-container look: density dropoff, self-shadow, temperature incandescence, and a channel-box UI.
+It is a Stam solver (advect, project, vorticity, buoyancy) with a Maya 2D-container look: density dropoff, self-shadow, temperature incandescence, and a channel-box panel.
 
-The sim itself is one file, `web/fluid.html`, matching the usual “single HTML, no build” fluid-demo brief. The host only wraps that page in WebView2.
+A separate WebGL page (`web/fluid.html`) exists only for the GitHub Pages demo. The screensaver and OBS path do not load it.
 
-**Live demo:** [jethac.github.io/obs-fluids](https://jethac.github.io/obs-fluids/)
+**Live demo (browser, optional):** [jethac.github.io/obs-fluids](https://jethac.github.io/obs-fluids/)
 
 MIT licensed. Not a fork of Pavel Dobryakov’s demo and not Autodesk code — method and look are documented in [LINEAGE.md](LINEAGE.md).
 
 ## Quick look
 
 ```text
-web/fluid.html          # the simulation
-host/                   # WinForms + WebView2 wrapper
-obs/ink-container.lua   # adds a Browser Source to the current scene
+host/                   # native D3D11 app + screensaver
+host/fluid.hlsl         # GPU sim passes
+web/fluid.html          # optional browser demo only
+obs/ink-container.lua   # OBS notes (use Game Capture)
 ```
 
 Open `web/fluid.html` in Edge or Chrome. Drag to stir. `H` hides the panel, `Space` pauses, `R` resets, `1`–`7` switch visualizations. `[` / `]` (or the brass **ENERGY** pot, or the MX Creative Console dial) is the one analog control: 0 is a still pond, 5 is the preset as authored, 10 is a storm.
@@ -49,7 +50,7 @@ Screensaver and OBS modes hide the panel and keep attract on so the field never 
 
 ## Screensaver
 
-Needs the [WebView2 runtime](https://go.microsoft.com/fwlink/p/?LinkId=2124703) (already on most Windows 11 machines) and, if you used a framework-dependent build, the .NET 10 desktop runtime.
+Windows 10/11 with Direct3D 11. Self-contained publish needs no extra runtime.
 
 ```powershell
 .\build.ps1
@@ -64,29 +65,13 @@ Settings (preset, quality, all monitors) live in `%LocalAppData%\InkContainer\se
 
 ## OBS
 
-### Browser Source (usual path)
-
-1. Add **Browser Source**
-2. Uncheck Local file, set URL to:
-
-   `https://jethac.github.io/obs-fluids/fluid.html?mode=obs&preset=demo&quality=high`
-
-   Or a local `file:///` path to `web/fluid.html`. Overlay: add `&alpha=1` and enable **Transparent**.
-3. Width/height e.g. 1920×1080, FPS 60
-4. **Uncheck** “Shutdown source when not visible”
-5. **Uncheck** “Refresh browser when scene becomes active”
-
-Right-click the source → **Interact** if you want to stir it by hand.
-
-Or: OBS **Tools → Scripts → +** and add `obs/ink-container.lua`, then **Add to current scene**.
-
-### Window capture
-
 ```text
 InkContainer.exe --obs
 ```
 
-Borderless 1920×1080 window, no UI. Capture with Game/Window Capture.
+Borderless 1920×1080 window, no UI. In OBS add **Game Capture** (preferred) or **Window Capture** on `Ink Container`.
+
+The old Browser Source HTML demo still exists at [jethac.github.io/obs-fluids](https://jethac.github.io/obs-fluids/) if you want a webpage overlay, but the supported path is the native window.
 
 ## Build
 

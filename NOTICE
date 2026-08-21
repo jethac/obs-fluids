@@ -5,7 +5,7 @@ This product is licensed under the MIT License. See LICENSE.
 
 Third-party components (not copied into this source tree; restored from NuGet at build):
 
-- Microsoft.Web.WebView2 — copyright Microsoft Corporation
+- Vortice.Windows (Direct3D 11 / DXGI / D3DCompiler) — MIT
 - HidSharp — copyright James F. Bellinger, Apache License 2.0
 
 The fluid method follows published work by Jos Stam and others (see LINEAGE.md).

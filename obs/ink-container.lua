@@ -1,5 +1,6 @@
--- Ink Container — add a GPU fluid sim as an OBS Browser Source.
--- Tools > Scripts > +  (point at this file)
+-- Ink Container
+-- The supported OBS path is native: run InkContainer.exe --obs and Game Capture it.
+-- This script remains as an optional Browser Source helper for the HTML demo.
 
 obs = obslua
 

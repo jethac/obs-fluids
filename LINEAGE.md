@@ -45,7 +45,7 @@ Those steps are the published method, not a particular repository.
 
 | | Pavel (2017 demo) | Ink Container |
 |---|---|---|
-| Language / runtime | WebGL app, MIT source | Original WebGL2 shaders in one HTML file |
+| Language / runtime | WebGL app, MIT source | Native D3D11 HLSL in the exe; optional WebGL page for GitHub Pages only |
 | Dye advection | Bilinear (manual when needed) | MacCormack with neighborhood clamp |
 | Temperature / buoyancy | No | Yes (Fedkiw-style rise) |
 | Shading | Optional lighting, sunrays, bloom | Maya-like self-shadow, incandescence ramp, container dropoff, no sunrays |

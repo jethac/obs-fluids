@@ -26,11 +26,11 @@ jobs:
       - uses: actions/checkout@v4
       - name: Check required files
         run: |
-          test -f web/fluid.html
+          test -f host/fluid.hlsl
           test -f host/InkContainer.csproj
           test -f LICENSE
-          grep -q "WebGL2" web/fluid.html
-          grep -q "ENERGY" web/fluid.html
+          grep -q "PSDisplay" host/fluid.hlsl
+          grep -q "D3D11" host/Gpu.cs
           grep -q "MIT License" LICENSE
 
   host:
